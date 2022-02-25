@@ -1,6 +1,14 @@
 <template>
   <div>
-    this is Admin page
+    <!-- this is Admin page -->
+    <el-breadcrumb separator="/">
+      <el-breadcrumb-item :to="{ path: '/home' }">
+        <i class="el-icon-s-home"></i>
+        首页
+      </el-breadcrumb-item>
+      <el-breadcrumb-item>系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+    </el-breadcrumb>
   </div>
 </template>
 

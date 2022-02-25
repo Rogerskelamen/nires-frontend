@@ -4,15 +4,19 @@
 
     <el-container>
 
-      <el-aside width="270px">
+      <el-aside :width="isCollapse ? '64px' : '270px'">
 
-        <div>
-          <h2 class="logo" @click="goHome">Nires</h2>
+        <div v-if="!isCollapse">
+          <h2 class="logo" @click="goHome">
+            Nires
+          </h2>
+        </div>
+        <div v-if="isCollapse" class="home-icon">
+          <i class="el-icon-house" @click="goHome"></i>
         </div>
         <el-menu
           :router="true"
-          :collapse-transition="true"
-          :default-active="activePath"
+          :collapse-transition="false"
           :collapse="isCollapse"
           :unique-opened="false"
           background-color="#33495f"
@@ -23,7 +27,6 @@
               <!-- 一级菜单的模版区域 -->
               <template slot="title">
                 <!-- Icon -->
-                &nbsp;&nbsp;&nbsp;&nbsp;
                 <i :class="iconsObject[item.id]"></i>
                 <!-- Paragraph -->
                 <span>&nbsp;&nbsp;&nbsp;&nbsp;{{ item.name }}</span>
@@ -31,7 +34,6 @@
 
               <!-- 二级菜单 -->
               <el-menu-item
-              @click="saveNavState(subItem.path)"
               v-for="subItem in item.children"
               :index="subItem.path"
               :key="subItem.id">
@@ -50,8 +52,8 @@
       <el-container class="right-main">
         <el-header class="shadow">
           <el-row class="top-bar" :gutter="0">
-            <el-col class="fold-icon" :span="12" :offset="0">
-              <i style="font-size: 36px;" class="el-icon-s-fold"></i>
+            <el-col class="fold-menu" :span="12" :offset="0">
+              <i class="fold-icon el-icon-s-fold" @click="foldMenu"></i>
               <span style="font-size: 22px;">&nbsp;&nbsp;&nbsp;&nbsp;人事管理系统</span>
             </el-col>
 
@@ -134,8 +136,6 @@ export default {
         4: 'el-icon-setting'
       },
 
-      activePath: '',
-
       // 是否折叠
       isCollapse: false
     }
@@ -152,10 +152,19 @@ export default {
       this.$router.push('/')
     },
 
-    // save the clicked state
-    saveNavState (activePath) {
-      window.sessionStorage.setItem('activePath', activePath)
-      this.activePath = activePath
+    // 折叠菜单
+    foldMenu () {
+      const icon = document.getElementsByClassName('fold-icon')[0]
+      const aside = document.getElementsByClassName('el-aside')[0]
+      console.log(this.$router.path)
+      if (!this.isCollapse) {
+        this.isCollapse = true
+        icon.className = 'fold-icon el-icon-s-unfold'
+        aside.style.width = '64px'
+      } else {
+        this.isCollapse = false
+        icon.className = 'fold-icon el-icon-s-fold'
+      }
     }
   }
 }
@@ -170,6 +179,7 @@ export default {
 
     .el-aside {
       background-color: #33495f;
+      transition: width 0.3s;
 
       .logo {
         text-align: center;
@@ -177,6 +187,24 @@ export default {
         font-family: 'Courier New', Courier, monospace;
         font-size: 28px;
         cursor: pointer;
+      }
+      .logo:hover {
+        text-shadow: 4px 5px 12px #000;
+      }
+
+      .home-icon {
+        height: 56px;
+        cursor: pointer;
+        padding: 0 20px;
+        text-align: center;
+        line-height: 56px;
+
+        i {
+          font-size: 18px;
+        }
+      }
+      .home-icon:hover {
+        background-color: rgb(41, 58, 76);
       }
 
       .el-menu {
@@ -195,10 +223,15 @@ export default {
         .top-bar {
           height: 100%;
 
-          .fold-icon {
+          .fold-menu {
             height: 100%;
             display: flex;
             align-items: center;
+
+            .fold-icon {
+              cursor: pointer;
+              font-size: 36px;
+            }
           }
 
           .user-place {
