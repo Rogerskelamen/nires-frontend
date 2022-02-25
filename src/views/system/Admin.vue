@@ -78,10 +78,24 @@
       :visible.sync="addAdminVisible"
       width="30%"
       :before-close="handleClose">
-      <span>这是一段信息</span>
+      <!-- <span>这是一段信息</span> -->
+      <el-form :model="addForm" status-icon ref="addFormRef" :rules="addFormRule" label-width="80px" size="normal">
+        <el-form-item label="账号名称" prop="username">
+          <el-input v-model="addForm.username"></el-input>
+        </el-form-item>
+        <el-form-item label="真实姓名" prop="realName">
+          <el-input v-model="addForm.realName"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPwd">
+          <el-input v-model="addForm.confirmPwd"></el-input>
+        </el-form-item>
+      </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addAdminVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addAdminVisible = false">确 定</el-button>
+        <el-button type="primary" @click="addAdminSubmit">确 定</el-button>
       </span>
     </el-dialog>
 
@@ -91,13 +105,60 @@
 <script>
 export default {
   data () {
+    const passwordCheck = (rule, value, callback) => {
+      if (value !== this.addForm.password) {
+        callback(new Error('两次密码不一致'))
+      } else {
+        callback()
+      }
+    }
+
     return {
-      addAdminVisible: false
+      addAdminVisible: false,
+
+      addForm: {
+        username: '',
+        realName: '',
+        password: '',
+        confirmPwd: ''
+      },
+
+      addFormRule: {
+        username: [
+          { required: true, message: '请输入账号名称', trigger: 'blur' },
+          { min: 3, max: 10, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ],
+        realName: [
+          { required: true, message: '请输入真实姓名', trigger: 'blur' }
+        ],
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' }
+        ],
+        confirmPwd: [
+          { required: true, message: '请输入确认密码', trigger: 'blur' },
+          { validator: passwordCheck, trigger: 'blur' }
+        ]
+      }
     }
   },
   methods: {
     addAdmin () {
+      this.addForm = {
+        username: '',
+        realName: '',
+        password: '',
+        confirmPwd: ''
+      }
       this.addAdminVisible = true
+    },
+
+    addAdminSubmit () {
+      this.$refs.addFormRef.validate(async (valid) => {
+        if (valid) {
+
+          this.addAdminVisible = false
+        }
+      })
     },
 
     changePwd () {
@@ -119,4 +180,8 @@ export default {
 #title {
   margin: 0;
 }
+
+// .el-form-item /deep/ label {
+//   font-size: 18px;
+// }
 </style>
