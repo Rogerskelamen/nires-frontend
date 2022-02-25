@@ -1,0 +1,16 @@
+body, ul, li {
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  text-decoration: none;
+}
+
+a:hover {
+  color: #409EFF;
+}
+
+li {
+  list-style: none;
+}
