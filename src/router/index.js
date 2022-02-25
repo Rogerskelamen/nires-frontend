@@ -23,6 +23,9 @@ const routes = [
     children: [{
       path: '/home/dashboard',
       component: () => import('@/views/DashBoard.vue')
+    }, {
+      path: '/system/admin',
+      component: () => import('@/views/system/Admin.vue')
     }]
   },
   {

@@ -12,11 +12,12 @@
         <el-menu
           :router="true"
           :collapse-transition="true"
+          :default-active="activePath"
           :collapse="isCollapse"
           :unique-opened="false"
           background-color="#33495f"
           text-color="#fff"
-          active-text-color="#409eff">
+          active-text-color="#12b7f5">
             <!-- 一级菜单 -->
             <el-submenu :index="item.id + ''" v-for="item in menuList" :key="item.id">
               <!-- 一级菜单的模版区域 -->
@@ -30,7 +31,7 @@
 
               <!-- 二级菜单 -->
               <el-menu-item
-              @click="saveNavState('/' + subItem.path)"
+              @click="saveNavState(subItem.path)"
               v-for="subItem in item.children"
               :index="subItem.path"
               :key="subItem.id">
@@ -47,21 +48,22 @@
       </el-aside>
 
       <el-container class="right-main">
-        <el-header type="">
-          <el-row :gutter="20">
-            <el-col :span="12" :offset="0">sdf</el-col>
+        <el-header class="shadow">
+          <el-row class="top-bar" :gutter="0">
+            <el-col class="fold-icon" :span="12" :offset="0">
+              <i style="font-size: 36px;" class="el-icon-s-fold"></i>
+              <span style="font-size: 22px;">&nbsp;&nbsp;&nbsp;&nbsp;人事管理系统</span>
+            </el-col>
+
             <el-col class="user-place" :span="12" :offset="0">
               <i class="el-icon-user-solid"></i>
               <el-dropdown>
                 <span class="el-dropdown-link">
-                  下拉菜单<i class="el-icon-arrow-down el-icon--right"></i>
+                  下拉菜单
+                  <i class="el-icon-arrow-down el-icon--right"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
-                  <el-dropdown-item>黄金糕</el-dropdown-item>
-                  <el-dropdown-item>狮子头</el-dropdown-item>
-                  <el-dropdown-item>螺蛳粉</el-dropdown-item>
-                  <el-dropdown-item disabled>双皮奶</el-dropdown-item>
-                  <el-dropdown-item divided>蚵仔煎</el-dropdown-item>
+                  <el-dropdown-item @click.native="logout">退出</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
             </el-col>
@@ -132,13 +134,28 @@ export default {
         4: 'el-icon-setting'
       },
 
+      activePath: '',
+
       // 是否折叠
       isCollapse: false
     }
   },
   methods: {
     goHome () {
+      window.sessionStorage.setItem('activePath', '')
+      this.activePath = ''
       this.$router.push('/home').catch(() => {})
+    },
+
+    // 登出
+    logout () {
+      this.$router.push('/')
+    },
+
+    // save the clicked state
+    saveNavState (activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
+      this.activePath = activePath
     }
   }
 }
@@ -164,6 +181,7 @@ export default {
 
       .el-menu {
         border-right: none;
+        font-weight: bold;
       }
       i {
         color: #fff;
@@ -174,19 +192,36 @@ export default {
       .el-header {
         background-color: rgb(238, 238, 238);
 
-        .el-dropdown-link {
-          cursor: pointer;
-        }
-        .el-dropdown-link:hover {
-          color: #0c57b9;
-        }
-        .el-icon-arrow-down {
-          font-size: 12px;
+        .top-bar {
+          height: 100%;
+
+          .fold-icon {
+            height: 100%;
+            display: flex;
+            align-items: center;
+          }
+
+          .user-place {
+            font-size: 28px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: end;
+
+            .el-dropdown-link {
+              cursor: pointer;
+              font-size: 16px;
+              font-weight: bold;
+            }
+            .el-dropdown-link:hover {
+              color: #0c57b9;
+            }
+            .el-icon-arrow-down {
+              font-size: 12px;
+            }
+          }
         }
 
-        .user-place {
-          font-size: 27px;
-        }
       }
     }
   }

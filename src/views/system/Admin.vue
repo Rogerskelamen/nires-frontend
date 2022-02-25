@@ -1,12 +1,12 @@
 <template>
   <div>
-
+    this is Admin page
   </div>
 </template>
 
 <script>
 export default {
-  
+
 }
 </script>
 
