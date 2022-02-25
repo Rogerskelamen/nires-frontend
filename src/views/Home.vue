@@ -53,7 +53,8 @@
         <el-header class="shadow">
           <el-row class="top-bar" :gutter="0">
             <el-col class="fold-menu" :span="12" :offset="0">
-              <i class="fold-icon el-icon-s-fold" @click="foldMenu"></i>
+              <i v-show="!isCollapse" class="fold-icon el-icon-s-fold transition-box" @click="foldMenu"></i>
+              <i v-show="isCollapse" class="fold-icon el-icon-s-unfold transition-box" @click="foldMenu"></i>
               <span style="font-size: 22px;">&nbsp;&nbsp;&nbsp;&nbsp;人事管理系统</span>
             </el-col>
 
@@ -154,17 +155,7 @@ export default {
 
     // 折叠菜单
     foldMenu () {
-      const icon = document.getElementsByClassName('fold-icon')[0]
-      const aside = document.getElementsByClassName('el-aside')[0]
-      console.log(this.$router.path)
-      if (!this.isCollapse) {
-        this.isCollapse = true
-        icon.className = 'fold-icon el-icon-s-unfold'
-        aside.style.width = '64px'
-      } else {
-        this.isCollapse = false
-        icon.className = 'fold-icon el-icon-s-fold'
-      }
+      this.isCollapse = !this.isCollapse
     }
   }
 }
@@ -219,6 +210,7 @@ export default {
     .right-main {
       .el-header {
         background-color: rgb(238, 238, 238);
+        z-index: 0;
 
         .top-bar {
           height: 100%;
