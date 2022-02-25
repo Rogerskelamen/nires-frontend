@@ -78,7 +78,7 @@
       :visible.sync="addAdminVisible"
       width="30%"
       :before-close="handleClose">
-      <!-- <span>这是一段信息</span> -->
+
       <el-form :model="addForm" status-icon ref="addFormRef" :rules="addFormRule" label-width="80px" size="normal">
         <el-form-item label="账号名称" prop="username">
           <el-input v-model="addForm.username"></el-input>
@@ -93,6 +93,7 @@
           <el-input v-model="addForm.confirmPwd"></el-input>
         </el-form-item>
       </el-form>
+
       <span slot="footer" class="dialog-footer">
         <el-button @click="addAdminVisible = false">取 消</el-button>
         <el-button type="primary" @click="addAdminSubmit">确 定</el-button>
@@ -155,7 +156,9 @@ export default {
     addAdminSubmit () {
       this.$refs.addFormRef.validate(async (valid) => {
         if (valid) {
-
+          // const { data: res } = await this.$http.post(
+          //   ``
+          // )
           this.addAdminVisible = false
         }
       })

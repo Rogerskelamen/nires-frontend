@@ -8,6 +8,8 @@ import '@/assets/css/global.css'
 
 Vue.config.productionTip = false
 
+axios.defaults.baseURL = 'http://localhost:8091/'
+
 Vue.prototype.$http = axios
 
 new Vue({
