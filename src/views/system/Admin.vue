@@ -32,10 +32,10 @@
             <el-descriptions :title="item.username" direction="vertical" :column="3">
               <el-descriptions-item label="真实姓名">{{ item.realName }}</el-descriptions-item>
               <el-descriptions-item label="基本操作">
-                <el-button type="primary" size="small" @click="changePwd(index)">修改密码</el-button>
+                <el-button type="primary" size="small" @click="changePwd(item.id)">修改密码</el-button>
               </el-descriptions-item>
               <el-descriptions-item label="危险区域">
-                <el-button type="danger" size="small" @click="deleteAdmin(index)">删除账号</el-button>
+                <el-button type="danger" size="small" @click="deleteAdmin(item.id)">删除账号</el-button>
               </el-descriptions-item>
             </el-descriptions>
           </el-card>
@@ -57,17 +57,39 @@
           <el-input v-model="addForm.realName"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input type="password" v-model="addForm.password"></el-input>
+          <el-input show-password v-model="addForm.password"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPwd">
-          <el-input type="password" v-model="addForm.confirmPwd"></el-input>
+          <el-input show-password v-model="addForm.confirmPwd"></el-input>
         </el-form-item>
       </el-form>
-
       <span slot="footer" class="dialog-footer">
         <el-button @click="addAdminVisible = false">取 消</el-button>
         <el-button type="primary" @click="addAdminSubmit">确 定</el-button>
       </span>
+    </el-dialog>
+
+    <el-dialog
+      title="修改密码"
+      :visible.sync="changePwdVisible"
+      width="30%"
+      :before-close="handleClose">
+
+      <el-form :model="changePwdForm" status-icon ref="changePwdFormRef" :rules="changePwdFormRule" label-width="80px" size="normal">
+        <el-form-item label="旧密码" prop="oldPassword">
+          <el-input show-password v-model="changePwdForm.oldPassword"></el-input>
+        </el-form-item>
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input show-password v-model="changePwdForm.newPassword"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPwd">
+          <el-input show-password v-model="changePwdForm.confirmPwd"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="changePwdVisible = false">取 消</el-button>
+        <el-button type="primary" @click="changePwdSubmit">确 定</el-button>
+      </div>
     </el-dialog>
 
   </div>
@@ -84,11 +106,20 @@ export default {
       }
     }
 
+    const changePwdCheck = (rule, value, callback) => {
+      if (value !== this.changePwdForm.newPassword) {
+        callback(new Error('两次密码不一致'))
+      } else {
+        callback()
+      }
+    }
+
     return {
       // 管理员列表
       adminList: [],
 
       addAdminVisible: false,
+      changePwdVisible: false,
 
       addForm: {
         username: '',
@@ -100,7 +131,7 @@ export default {
       addFormRule: {
         username: [
           { required: true, message: '请输入账号名称', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
         ],
         realName: [
           { required: true, message: '请输入真实姓名', trigger: 'blur' }
@@ -112,6 +143,27 @@ export default {
         confirmPwd: [
           { required: true, message: '请输入确认密码', trigger: 'blur' },
           { validator: passwordCheck, trigger: 'blur' }
+        ]
+      },
+
+      changePwdForm: {
+        id: '',
+        oldPassword: '',
+        newPassword: '',
+        confirmPwd: ''
+      },
+
+      changePwdFormRule: {
+        oldPassword: [
+          { required: true, message: '请输入旧密码', trigger: 'blur' }
+        ],
+        newPassword: [
+          { required: true, message: '请输入新密码', trigger: 'blur' },
+          { min: 6, message: '密码长度需大于6位', trigger: 'blur' }
+        ],
+        confirmPwd: [
+          { required: true, message: '请输入确认密码', trigger: 'blur' },
+          { validator: changePwdCheck, trigger: 'blur' }
         ]
       }
     }
@@ -155,16 +207,61 @@ export default {
           console.log('id = ' + res.data)
           this.$message.success('添加账号成功')
           this.addAdminVisible = false
+          this.getAllAdmin()
         }
       })
     },
 
-    changePwd () {
-
+    // 修改密码
+    changePwd (id) {
+      this.changePwdForm = {
+        id: id,
+        oldPassword: '',
+        newPassword: '',
+        confirmPwd: ''
+      }
+      this.changePwdVisible = true
     },
 
-    deleteAdmin () {
+    // 修改密码提交
+    changePwdSubmit () {
+      this.$refs.changePwdFormRef.validate(async (valid) => {
+        if (valid) {
+          const { data: res } = await this.$http.post(
+            `admins/pwd`,
+            {
+              id: this.changePwdForm.id,
+              oldPassword: this.changePwdForm.oldPassword,
+              newPassword: this.changePwdForm.newPassword
+            }
+          )
+          if (!res.success) return this.$message.error(res.msg)
+          console.log('id = ' + res.data)
+          this.$message.success('修改密码成功')
+          this.changePwdVisible = false
+        }
+      })
+    },
 
+    // 删除账号
+    deleteAdmin (id) {
+      this.$confirm('此操作将永久删除该账号, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        if (this.adminList.length <= 1) return this.$message.error('您不能删除最后一个管理员账号')
+        const { data: res } = await this.$http.get(`admins/delete/${id}`)
+        if (!res.success) return this.$message.error(res.msg)
+        console.log('id = ' + res.data)
+        this.$message.success('已删除该账号')
+        this.getAllAdmin()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     },
 
     handleClose (done) {
