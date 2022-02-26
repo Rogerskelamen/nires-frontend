@@ -20,57 +20,27 @@
             <h3 id="title">账号管理</h3>
           </el-col>
           <el-col type="flex" align="right" :span="12" :offset="0">
-            <el-button type="success" size="medium" @click="addAdmin">添加账号</el-button>
+            <el-button type="success" class="shadow" size="medium" @click="addAdmin">添加账号</el-button>
           </el-col>
         </el-row>
       </div>
 
       <!-- 账号展示 -->
       <el-row :gutter="20">
-        <el-col :span="8" :offset="0">
-          <el-card shadow="always" :body-style="{ padding: '20px' }">
-            <el-descriptions title="老李" direction="vertical" :column="3">
-              <el-descriptions-item label="真实姓名">aaa</el-descriptions-item>
+        <el-col :span="8" :offset="0" v-for="(item, index) in adminList" :key="index">
+          <el-card shadow="always" style="margin-bottom: 15px;" :body-style="{ padding: '20px' }">
+            <el-descriptions :title="item.username" direction="vertical" :column="3">
+              <el-descriptions-item label="真实姓名">{{ item.realName }}</el-descriptions-item>
               <el-descriptions-item label="基本操作">
-                <!-- <el-tag size="small">更改</el-tag> -->
-                <el-button type="primary" size="small" @click="changePwd()">修改密码</el-button>
+                <el-button type="primary" size="small" @click="changePwd(index)">修改密码</el-button>
               </el-descriptions-item>
               <el-descriptions-item label="危险区域">
-                <el-button type="danger" size="small" @click="deleteAdmin()">删除账号</el-button>
-              </el-descriptions-item>
-            </el-descriptions>
-          </el-card>
-        </el-col>
-        <el-col :span="8" :offset="0">
-          <el-card shadow="always" :body-style="{ padding: '20px' }">
-            <el-descriptions title="老李" direction="vertical" :column="3">
-              <el-descriptions-item label="真实姓名">aaa</el-descriptions-item>
-              <el-descriptions-item label="基本操作">
-                <!-- <el-tag size="small">更改</el-tag> -->
-                <el-button type="primary" size="small" @click="changePwd()">修改密码</el-button>
-              </el-descriptions-item>
-              <el-descriptions-item label="危险区域">
-                <el-button type="danger" size="small" @click="deleteAdmin()">删除账号</el-button>
-              </el-descriptions-item>
-            </el-descriptions>
-          </el-card>
-        </el-col>
-        <el-col :span="8" :offset="0">
-          <el-card shadow="always" :body-style="{ padding: '20px' }">
-            <el-descriptions title="老李" direction="vertical" :column="3">
-              <el-descriptions-item label="真实姓名">aaa</el-descriptions-item>
-              <el-descriptions-item label="基本操作">
-                <!-- <el-tag size="small">更改</el-tag> -->
-                <el-button type="primary" size="small" @click="changePwd()">修改密码</el-button>
-              </el-descriptions-item>
-              <el-descriptions-item label="危险区域">
-                <el-button type="danger" size="small" @click="deleteAdmin()">删除账号</el-button>
+                <el-button type="danger" size="small" @click="deleteAdmin(index)">删除账号</el-button>
               </el-descriptions-item>
             </el-descriptions>
           </el-card>
         </el-col>
       </el-row>
-
     </el-card>
 
     <el-dialog
@@ -87,10 +57,10 @@
           <el-input v-model="addForm.realName"></el-input>
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="addForm.password"></el-input>
+          <el-input type="password" v-model="addForm.password"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" prop="confirmPwd">
-          <el-input v-model="addForm.confirmPwd"></el-input>
+          <el-input type="password" v-model="addForm.confirmPwd"></el-input>
         </el-form-item>
       </el-form>
 
@@ -115,6 +85,9 @@ export default {
     }
 
     return {
+      // 管理员列表
+      adminList: [],
+
       addAdminVisible: false,
 
       addForm: {
@@ -133,7 +106,8 @@ export default {
           { required: true, message: '请输入真实姓名', trigger: 'blur' }
         ],
         password: [
-          { required: true, message: '请输入密码', trigger: 'blur' }
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 6, message: '密码长度需大于6位', trigger: 'blur' }
         ],
         confirmPwd: [
           { required: true, message: '请输入确认密码', trigger: 'blur' },
@@ -142,7 +116,19 @@ export default {
       }
     }
   },
+
+  created () {
+    this.getAllAdmin()
+  },
+
   methods: {
+    async getAllAdmin () {
+      const { data: res } = await this.$http.get(`admins`)
+      console.log(res)
+      if (!res.success) return this.$message.error(res.msg)
+      this.adminList = res.data
+    },
+
     addAdmin () {
       this.addForm = {
         username: '',
@@ -153,12 +139,21 @@ export default {
       this.addAdminVisible = true
     },
 
+    // 提交添加用户表单
     addAdminSubmit () {
       this.$refs.addFormRef.validate(async (valid) => {
         if (valid) {
-          // const { data: res } = await this.$http.post(
-          //   ``
-          // )
+          const { data: res } = await this.$http.post(
+            `admins/add`,
+            {
+              username: this.addForm.username,
+              realName: this.addForm.realName,
+              password: this.addForm.password
+            }
+          )
+          if (!res.success) return this.$message.error(res.msg)
+          console.log('id = ' + res.data)
+          this.$message.success('添加账号成功')
           this.addAdminVisible = false
         }
       })
@@ -183,8 +178,4 @@ export default {
 #title {
   margin: 0;
 }
-
-// .el-form-item /deep/ label {
-//   font-size: 18px;
-// }
 </style>
