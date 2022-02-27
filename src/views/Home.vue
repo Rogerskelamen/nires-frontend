@@ -16,6 +16,7 @@
         </div>
         <el-menu
           :router="true"
+          :default-active="activePath"
           :collapse-transition="false"
           :collapse="isCollapse"
           :unique-opened="false"
@@ -34,6 +35,7 @@
 
               <!-- 二级菜单 -->
               <el-menu-item
+              @click="saveNavState(subItem.path)"
               v-for="subItem in item.children"
               :index="subItem.path"
               :key="subItem.id">
@@ -132,13 +134,16 @@ export default {
       }],
       iconsObject: {
         1: 'el-icon-edit-outline',
-        2: 'el-icon-tickets',
+        2: 'el-icon-user',
         3: 'el-icon-bell',
         4: 'el-icon-setting'
       },
 
       // 是否折叠
-      isCollapse: false
+      isCollapse: false,
+
+      // 被点击激活的菜单
+      activePath: ''
     }
   },
   methods: {
@@ -149,13 +154,23 @@ export default {
     },
 
     // 登出
-    logout () {
+    async logout () {
+      const { data: res } = await this.$http.get(`login/logout`)
+      if (!res.success) return this.$message.error(res.msg)
+      window.sessionStorage.clear()
+      this.$message.success('登出成功')
       this.$router.push('/')
     },
 
     // 折叠菜单
     foldMenu () {
       this.isCollapse = !this.isCollapse
+    },
+
+    // save the clicked state
+    saveNavState (activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
+      this.activePath = activePath
     }
   }
 }

@@ -23,7 +23,32 @@ const routes = [
     children: [{
       path: '/home/dashboard',
       component: () => import('@/views/DashBoard.vue')
-    }, {
+    },
+    {
+      path: '/interview/manage',
+      component: () => import('@/views/interview/Manage.vue')
+    },
+    {
+      path: '/interview/handle',
+      component: () => import('@/views/interview/Handle.vue')
+    },
+    {
+      path: '/resource/department',
+      component: () => import('@/views/resource/Department.vue')
+    },
+    {
+      path: '/resource/staff',
+      component: () => import('@/views/resource/Staff.vue')
+    },
+    {
+      path: '/alter/position',
+      component: () => import('@/views/alter/Position.vue')
+    },
+    {
+      path: '/alter/transfer',
+      component: () => import('@/views/alter/Transfer.vue')
+    },
+    {
       path: '/system/admin',
       component: () => import('@/views/system/Admin.vue')
     }]

@@ -78,7 +78,7 @@ export default {
           this.verifyVisible = false
           return this.$message.error(res.msg)
         }
-        window.sessionStorage.setItem('token', res.data)
+        window.sessionStorage.setItem('token', res.data.token)
         this.$message.success('登录成功')
         this.$router.push('/home')
       }, 500)
