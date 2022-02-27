@@ -57,6 +57,14 @@ export default {
       isShowSelf: false
     }
   },
+
+  created () {
+    // 如果一开始浏览器中就有token
+    // 说明已经登录过了，可以直接跳转到主页，这时候就要看token有没有过期
+    const tokenStr = window.sessionStorage.getItem('token')
+    if (tokenStr) return this.$router.push('/home')
+  },
+
   methods: {
     login () {
       // 如果两者任一为空，则不能登录
@@ -79,6 +87,7 @@ export default {
           return this.$message.error(res.msg)
         }
         window.sessionStorage.setItem('token', res.data.token)
+        window.sessionStorage.setItem('admin', res.data.realName)
         this.$message.success('登录成功')
         this.$router.push('/home')
       }, 500)

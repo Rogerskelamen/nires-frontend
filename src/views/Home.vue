@@ -35,7 +35,7 @@
 
               <!-- 二级菜单 -->
               <el-menu-item
-              @click="saveNavState(subItem.path)"
+              @click="setActivePath(subItem.path)"
               v-for="subItem in item.children"
               :index="subItem.path"
               :key="subItem.id">
@@ -64,7 +64,7 @@
               <i class="el-icon-user-solid"></i>
               <el-dropdown>
                 <span class="el-dropdown-link">
-                  下拉菜单
+                  {{ adminName }}
                   <i class="el-icon-arrow-down el-icon--right"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
@@ -84,6 +84,8 @@
 </template>
 
 <script>
+import { mapState, mapMutations } from 'vuex'
+
 export default {
   data () {
     return {
@@ -142,14 +144,22 @@ export default {
       // 是否折叠
       isCollapse: false,
 
-      // 被点击激活的菜单
-      activePath: ''
+      adminName: ''
     }
   },
+  computed: {
+    ...mapState(['activePath'])
+  },
+
+  created () {
+    this.adminName = window.sessionStorage.getItem('admin')
+  },
+
   methods: {
+    ...mapMutations(['setActivePath', 'rmActivePath']),
+
     goHome () {
-      window.sessionStorage.setItem('activePath', '')
-      this.activePath = ''
+      this.rmActivePath()
       this.$router.push('/home').catch(() => {})
     },
 
@@ -165,12 +175,6 @@ export default {
     // 折叠菜单
     foldMenu () {
       this.isCollapse = !this.isCollapse
-    },
-
-    // save the clicked state
-    saveNavState (activePath) {
-      window.sessionStorage.setItem('activePath', activePath)
-      this.activePath = activePath
     }
   }
 }

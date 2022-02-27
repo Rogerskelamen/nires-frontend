@@ -4,9 +4,9 @@ import router from './router'
 import './plugins/element'
 import './plugins/slider-verify'
 import axios from './plugins/axios'
+import store from './store'
 
 import '@/assets/css/global.css'
-import store from './store'
 
 Vue.config.productionTip = false
 
