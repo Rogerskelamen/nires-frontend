@@ -144,6 +144,7 @@ export default {
       // 是否折叠
       isCollapse: false,
 
+      // 管理员姓名存储
       adminName: ''
     }
   },
@@ -165,7 +166,8 @@ export default {
 
     // 登出
     async logout () {
-      const { data: res } = await this.$http.get(`login/logout`)
+      const token = window.sessionStorage.getItem('token')
+      const { data: res } = await this.$http.get(`logout/${token}`)
       if (!res.success) return this.$message.error(res.msg)
       window.sessionStorage.clear()
       this.$message.success('登出成功')
