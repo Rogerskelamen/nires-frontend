@@ -3,13 +3,11 @@ import App from './App.vue'
 import router from './router'
 import './plugins/element'
 import './plugins/slider-verify'
-import axios from 'axios'
+import axios from './plugins/axios'
 
 import '@/assets/css/global.css'
 
 Vue.config.productionTip = false
-
-axios.defaults.baseURL = 'http://localhost:8091/'
 
 Vue.prototype.$http = axios
 

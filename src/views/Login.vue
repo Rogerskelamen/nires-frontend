@@ -68,7 +68,7 @@ export default {
     },
 
     loginSubmit () {
-      // 延迟0.8s再登录
+      // 延迟0.5s再登录
       setTimeout(async () => {
         const { data: res } = await this.$http.post(
           `login`,
@@ -81,7 +81,7 @@ export default {
         window.sessionStorage.setItem('token', res.data)
         this.$message.success('登录成功')
         this.$router.push('/home')
-      }, 800)
+      }, 500)
     },
 
     resetForm () {

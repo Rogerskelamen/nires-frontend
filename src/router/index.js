@@ -47,6 +47,9 @@ router.beforeEach((to, from, next) => {
     return next()
   }
 
+  // 没有token就返回到登录页面
+  const tokenStr = window.sessionStorage.getItem('token')
+  if (!tokenStr) return next('/login')
   next()
 })
 
