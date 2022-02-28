@@ -17,10 +17,11 @@
       <el-button type="success" size="large" @click="addInterview">Click Me</el-button>
     </p>
 
+    <!-- 面试计划 -->
     <el-card class="interview-plan" shadow="always">
       <div slot="header">
         <span>面试计划</span>
-        <el-link type="primary">More<i class="el-icon-view el-icon--right"></i> </el-link>
+        <el-link type="primary">More<i class="el-icon-view el-icon--right"></i></el-link>
       </div>
       <!-- card body -->
       <!-- 计划数据展示 -->
@@ -53,6 +54,43 @@
       </el-row>
     </el-card>
 
+    <el-divider></el-divider>
+
+    <!-- 面试记录 -->
+    <el-card class="interview-record" shadow="always">
+      <div slot="header">
+        <span>面试记录</span>
+        <el-link type="primary">More<i class="el-icon-view el-icon--right"></i></el-link>
+      </div>
+      <!-- card body -->
+      <!-- 计划数据展示 -->
+      <el-row :gutter="20">
+        <el-col :span="12" v-for="(item, index) in interviewRecords" :key="index">
+          <el-card shadow="always" style="margin-bottom: 15px;">
+            <el-descriptions direction="vertical" :column="4" border>
+              <el-descriptions-item label="面试人">{{ item.interviewee }}</el-descriptions-item>
+              <el-descriptions-item label="面试官">{{ item.interviewer }}</el-descriptions-item>
+              <el-descriptions-item label="意向部门">{{ item.department }}</el-descriptions-item>
+              <el-descriptions-item label="意向岗位">{{ item.position }}</el-descriptions-item>
+              <el-descriptions-item label="时间">
+                {{ toTimeString(item.date) }}
+              </el-descriptions-item>
+              <el-descriptions-item label="联系方式" :span="2">
+                <el-tag size="small">tel</el-tag>
+                {{ item.contact }}
+              </el-descriptions-item>
+              <el-descriptions-item label="操作">
+                <el-tooltip content="删除" placement="top">
+                  <el-button type="danger" size="small" icon="el-icon-delete" @click="deletePlan(item.id)"></el-button>
+                </el-tooltip>
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-card>
+        </el-col>
+      </el-row>
+    </el-card>
+
+    <!-- 增加面试 -->
     <el-dialog
       title="添加面试"
       :visible.sync="addInterviewVisible"
@@ -91,6 +129,7 @@
       </span>
     </el-dialog>
 
+    <!-- 编辑面试计划 -->
     <el-dialog
       title="编辑面试计划"
       :visible.sync="editInterviewVisible"
@@ -144,6 +183,7 @@ export default {
 
     return {
       interviewPlans: [],
+      interviewRecords: [],
 
       addInterviewForm: {
         interviewee: '',
@@ -216,6 +256,7 @@ export default {
 
   created () {
     this.getAllPlans()
+    this.getAllRecords()
   },
 
   methods: {
@@ -223,6 +264,13 @@ export default {
       const { data: res } = await this.$http.post(`interviews`, {})
       if (!res.success) return this.$message.error(res.msg)
       this.interviewPlans = res.data
+      console.log(res)
+    },
+
+    async getAllRecords () {
+      const { data: res } = await this.$http.post(`interviews/records`, {})
+      if (!res.success) return this.$message.error(res.msg)
+      this.interviewRecords = res.data
       console.log(res)
     },
 
@@ -277,7 +325,7 @@ export default {
       this.$refs.editInterviewFormRef.validate(async valid => {
         if (valid) {
           const { data: res } = await this.$http.post(
-            `interviews/add`,
+            `interviews/edit`,
             this.editInterview
           )
           if (!res.success) return this.$message.error(res.msg)
@@ -286,6 +334,26 @@ export default {
           this.editInterviewVisible = false
           this.getAllPlans()
         }
+      })
+    },
+
+    deletePlan (id) {
+      this.$confirm('此操作将永久删除该账号, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { data: res } = await this.$http.get(`interviews/${id}`)
+        if (!res.success) return this.$message.error(res.msg)
+        console.log('id = ' + res.data)
+        this.$message.success('删除成功')
+        this.getAllPlans()
+        this.getAllRecords()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
       })
     },
 
@@ -313,6 +381,12 @@ export default {
 .interview-plan {
   margin-top: 10px;
 
+  .el-link {
+    font-size: 16px;
+    float: right;
+  }
+}
+.interview-record {
   .el-link {
     font-size: 16px;
     float: right;
