@@ -193,7 +193,7 @@ export default {
 
     // 提交添加用户表单
     addAdminSubmit () {
-      this.$refs.addFormRef.validate(async (valid) => {
+      this.$refs.addFormRef.validate(async valid => {
         if (valid) {
           const { data: res } = await this.$http.post(
             `admins/add`,
