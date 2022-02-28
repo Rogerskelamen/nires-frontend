@@ -264,6 +264,7 @@ export default {
 
     editPlan (plan) {
       this.editInterview = {
+        id: plan.id,
         interviewer: plan.interviewer,
         date: plan.date,
         department: plan.department,
@@ -277,12 +278,7 @@ export default {
         if (valid) {
           const { data: res } = await this.$http.post(
             `interviews/add`,
-            {
-              interviewer: this.editInterview.interviewer,
-              date: this.editInterview.date,
-              department: this.editInterview.department,
-              position: this.editInterview.position
-            }
+            this.editInterview
           )
           if (!res.success) return this.$message.error(res.msg)
           console.log('id = ' + res.data)
