@@ -17,6 +17,42 @@
       <el-button type="success" size="large" @click="addInterview">Click Me</el-button>
     </p>
 
+    <el-card class="interview-plan" shadow="always">
+      <div slot="header">
+        <span>面试计划</span>
+        <el-link type="primary">More<i class="el-icon-view el-icon--right"></i> </el-link>
+      </div>
+      <!-- card body -->
+      <!-- 计划数据展示 -->
+      <el-row :gutter="20">
+        <el-col :span="12" v-for="(item, index) in interviewPlans" :key="index">
+          <el-card shadow="always" style="margin-bottom: 15px;">
+            <el-descriptions direction="vertical" :column="4" border>
+              <el-descriptions-item label="面试人">{{ item.interviewee }}</el-descriptions-item>
+              <el-descriptions-item label="面试官">{{ item.interviewer }}</el-descriptions-item>
+              <el-descriptions-item label="意向部门">{{ item.department }}</el-descriptions-item>
+              <el-descriptions-item label="意向岗位">{{ item.position }}</el-descriptions-item>
+              <el-descriptions-item label="时间">
+                {{ toTimeString(item.date) }}
+              </el-descriptions-item>
+              <el-descriptions-item label="联系方式" :span="2">
+                <el-tag size="small">tel</el-tag>
+                {{ item.contact }}
+              </el-descriptions-item>
+              <el-descriptions-item label="操作">
+                <el-tooltip content="编辑" placement="top">
+                  <el-button type="primary" size="small" icon="el-icon-edit" @click="editPlan(item)"></el-button>
+                </el-tooltip>
+                <el-tooltip content="删除" placement="top">
+                  <el-button type="danger" size="small" icon="el-icon-delete" @click="deletePlan(item.id)"></el-button>
+                </el-tooltip>
+              </el-descriptions-item>
+            </el-descriptions>
+          </el-card>
+        </el-col>
+      </el-row>
+    </el-card>
+
     <el-dialog
       title="添加面试"
       :visible.sync="addInterviewVisible"
@@ -55,10 +91,44 @@
       </span>
     </el-dialog>
 
+    <el-dialog
+      title="编辑面试计划"
+      :visible.sync="editInterviewVisible"
+      width="30%"
+      :before-close="handleClose">
+      <!-- <span></span> -->
+      <el-form :model="editInterview" status-icon ref="editInterviewFormRef" :rules="editFormRule" label-width="80px" size="normal">
+        <el-form-item label="面试官" prop="interviewer">
+          <el-input v-model="editInterview.interviewer"></el-input>
+        </el-form-item>
+        <el-form-item label="面试时间" prop="date">
+          <el-date-picker
+            v-model="editInterview.date"
+            type="datetime"
+            placeholder="选择日期时间"
+            align="right"
+            :picker-options="pickerOptions">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="意向部门" prop="department">
+          <el-input v-model="editInterview.department"></el-input>
+        </el-form-item>
+        <el-form-item label="意向岗位" prop="position">
+          <el-input v-model="editInterview.position"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer">
+        <el-button @click="editInterviewVisible = false">取 消</el-button>
+        <el-button type="primary" @click="editInterviewSubmit">确 认</el-button>
+      </span>
+    </el-dialog>
+
   </div>
 </template>
 
 <script>
+import { toTimeString } from '@/utils/time.js'
+
 export default {
   data () {
     // 验证手机号格式
@@ -73,6 +143,8 @@ export default {
     }
 
     return {
+      interviewPlans: [],
+
       addInterviewForm: {
         interviewee: '',
         interviewer: '',
@@ -81,6 +153,8 @@ export default {
         position: '',
         contact: ''
       },
+
+      editInterview: {},
 
       addFormRule: {
         interviewee: [
@@ -104,6 +178,21 @@ export default {
         ]
       },
 
+      editFormRule: {
+        interviewer: [
+          { required: true, message: '请输入面试官', trigger: 'blur' }
+        ],
+        date: [
+          { type: 'date', required: true, message: '请选择时间', trigger: 'blur' }
+        ],
+        department: [
+          { required: true, message: '请输入意向部门', trigger: 'blur' }
+        ],
+        position: [
+          { required: true, message: '请输入意向岗位', trigger: 'blur' }
+        ]
+      },
+
       pickerOptions: {
         shortcuts: [{
           text: '今天',
@@ -111,20 +200,32 @@ export default {
             picker.$emit('pick', new Date())
           }
         }, {
-          text: '昨天',
+          text: '明天',
           onClick (picker) {
             const date = new Date()
-            date.setTime(date.getTime() - 3600 * 1000 * 24)
+            date.setTime(date.getTime() + 3600 * 1000 * 24)
             picker.$emit('pick', date)
           }
         }]
       },
 
-      addInterviewVisible: false
+      addInterviewVisible: false,
+      editInterviewVisible: false
     }
   },
 
+  created () {
+    this.getAllPlans()
+  },
+
   methods: {
+    async getAllPlans () {
+      const { data: res } = await this.$http.post(`interviews`, {})
+      if (!res.success) return this.$message.error(res.msg)
+      this.interviewPlans = res.data
+      console.log(res)
+    },
+
     addInterview () {
       this.addInterviewVisible = true
       this.addInterviewForm = {
@@ -137,9 +238,8 @@ export default {
       }
     },
 
+    // 添加面试提交
     addInterviewSubmit () {
-      // console.log(this.addInterviewForm)
-      // console.log(this.addInterviewForm.date.getTime())
       this.$refs.addInterviewFormRef.validate(async valid => {
         if (valid) {
           const { data: res } = await this.$http.post(
@@ -157,12 +257,48 @@ export default {
           console.log('id = ' + res.data)
           this.$message.success('添加成功')
           this.addInterviewVisible = false
+          this.getAllPlans()
+        }
+      })
+    },
+
+    editPlan (plan) {
+      this.editInterview = {
+        interviewer: plan.interviewer,
+        date: plan.date,
+        department: plan.department,
+        position: plan.position
+      }
+      this.editInterviewVisible = true
+    },
+
+    editInterviewSubmit () {
+      this.$refs.editInterviewFormRef.validate(async valid => {
+        if (valid) {
+          const { data: res } = await this.$http.post(
+            `interviews/add`,
+            {
+              interviewer: this.editInterview.interviewer,
+              date: this.editInterview.date,
+              department: this.editInterview.department,
+              position: this.editInterview.position
+            }
+          )
+          if (!res.success) return this.$message.error(res.msg)
+          console.log('id = ' + res.data)
+          this.$message.success('修改成功')
+          this.editInterviewVisible = false
+          this.getAllPlans()
         }
       })
     },
 
     handleClose (done) {
       done()
+    },
+
+    toTimeString (time) {
+      return toTimeString(time)
     }
   }
 }
@@ -175,6 +311,15 @@ export default {
   .el-button {
     padding: 5px;
     font-size: 18px;
+  }
+}
+
+.interview-plan {
+  margin-top: 10px;
+
+  .el-link {
+    font-size: 16px;
+    float: right;
   }
 }
 </style>
