@@ -75,9 +75,13 @@
               <el-descriptions-item label="时间">
                 {{ toTimeString(item.date) }}
               </el-descriptions-item>
-              <el-descriptions-item label="联系方式" :span="2">
+              <el-descriptions-item label="联系方式">
                 <el-tag size="small">tel</el-tag>
                 {{ item.contact }}
+              </el-descriptions-item>
+              <el-descriptions-item label="是否通过">
+                <el-tag v-show="item.isPassed === 1" size="small">{{ 通过 }}</el-tag>
+                <el-tag v-show="item.isPassed === 2" type="info" size="small">{{ 未通过 }}</el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="操作">
                 <el-tooltip content="删除" placement="top">

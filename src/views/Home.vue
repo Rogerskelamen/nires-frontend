@@ -231,7 +231,7 @@ export default {
     .right-main {
       .el-header {
         background-color: rgb(238, 238, 238);
-        z-index: 0;
+        z-index: 1;
 
         .top-bar {
           height: 100%;
