@@ -14,7 +14,10 @@
 
     <!-- 面试记录 -->
     <el-card class="interview-record" shadow="always" style="margin-top: 20px;">
-      <div class="tip">现在还有<el-tag type="primary" size="mini">{{ interviewAssess.length }}</el-tag>条数据需要处理</div>
+      <div class="tip">
+        现在还有<el-tag type="primary" size="mini">{{ interviewAssess.length }}</el-tag>条数据需要处理
+        <span v-show="interviewAssess.length === 0">Well Done!</span>
+      </div>
       <!-- card body -->
       <!-- 计划数据展示 -->
       <el-row :gutter="20">
@@ -33,11 +36,11 @@
                 {{ item.contact }}
               </el-descriptions-item>
               <el-descriptions-item label="操作">
-                <el-tooltip content="删除" placement="top">
-                  <el-button type="danger" size="small" icon="el-icon-delete" @click="deletePlan(item.id)"></el-button>
+                <el-tooltip content="录用" placement="top">
+                  <el-button type="success" size="small" @click="hirePerson(item.id)">hire</el-button>
                 </el-tooltip>
-                <el-tooltip content="删除" placement="top">
-                  <el-button type="danger" size="small" icon="el-icon-delete" @click="deletePlan(item.id)"></el-button>
+                <el-tooltip content="未通过" placement="top">
+                  <el-button type="danger" size="small" @click="passPerson(item.id)">pass</el-button>
                 </el-tooltip>
               </el-descriptions-item>
             </el-descriptions>
@@ -68,6 +71,25 @@ export default {
       if (!res.success) return this.$message.error(res.msg)
       this.interviewAssess = res.data
       console.log(res)
+    },
+
+    passPerson (id) {
+      this.$confirm('此操作将不再录用该应聘人员, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { data: res } = await this.$http.get(`interviews/pass/${id}/2`)
+        if (!res.success) return this.$message.error(res.msg)
+        console.log('id = ' + res.data)
+        this.$message.success('已设为不通过')
+        this.getAllInterviews()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
     },
 
     toTimeString (time) {

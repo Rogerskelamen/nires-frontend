@@ -80,8 +80,8 @@
                 {{ item.contact }}
               </el-descriptions-item>
               <el-descriptions-item label="是否通过">
-                <el-tag v-show="item.isPassed === 1" size="small">{{ 通过 }}</el-tag>
-                <el-tag v-show="item.isPassed === 2" type="info" size="small">{{ 未通过 }}</el-tag>
+                <el-tag v-show="item.isPassed === 1" size="small">已录用</el-tag>
+                <el-tag v-show="item.isPassed === 2" type="info" size="small">未通过</el-tag>
               </el-descriptions-item>
               <el-descriptions-item label="操作">
                 <el-tooltip content="删除" placement="top">
@@ -342,7 +342,7 @@ export default {
     },
 
     deletePlan (id) {
-      this.$confirm('此操作将永久删除该账号, 是否继续?', '提示', {
+      this.$confirm('此操作将删除该面试计划, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
