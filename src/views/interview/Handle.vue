@@ -48,6 +48,39 @@
         </el-col>
       </el-row>
     </el-card>
+
+    <!-- 添加员工信息 -->
+    <el-dialog
+      title="员工信息入档"
+      :visible.sync="addEmpVisible"
+      width="width"
+      :before-close="handleClose">
+      <!-- <div></div> -->
+      <el-form :model="addEmpForm" status-icon ref="editInterviewFormRef" :rules="editFormRule" label-width="80px" size="normal">
+        <el-form-item label="面试官" prop="interviewer">
+          <el-input v-model="addEmpForm.interviewer"></el-input>
+        </el-form-item>
+        <el-form-item label="面试时间" prop="date">
+          <el-date-picker
+            v-model="addEmpForm.date"
+            type="datetime"
+            placeholder="选择日期时间"
+            align="right"
+            :picker-options="pickerOptions">
+          </el-date-picker>
+        </el-form-item>
+        <el-form-item label="意向部门" prop="department">
+          <el-input v-model="addEmpForm.department"></el-input>
+        </el-form-item>
+        <el-form-item label="意向岗位" prop="position">
+          <el-input v-model="addEmpForm.position"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="addEmpVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addEmpVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -57,7 +90,13 @@ import { toTimeString } from '@/utils/time.js'
 export default {
   data () {
     return {
-      interviewAssess: []
+      interviewAssess: [],
+
+      addEmpForm: {
+
+      },
+
+      addEmpVisible: false
     }
   },
 
@@ -71,6 +110,10 @@ export default {
       if (!res.success) return this.$message.error(res.msg)
       this.interviewAssess = res.data
       console.log(res)
+    },
+
+    hirePerson (id) {
+      this.addEmpVisible = true
     },
 
     passPerson (id) {
@@ -90,6 +133,10 @@ export default {
           message: '已取消删除'
         })
       })
+    },
+
+    handleClose (done) {
+      done()
     },
 
     toTimeString (time) {
