@@ -118,10 +118,14 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item label="意向部门" prop="department">
-          <el-input v-model="addInterviewForm.department"></el-input>
+          <el-select @change="getPositions" v-model="addInterviewForm.department" placeholder="请选择部门">
+            <el-option v-for="item in departments" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="意向岗位" prop="position">
-          <el-input v-model="addInterviewForm.position"></el-input>
+          <el-select v-model="addInterviewForm.position" placeholder="请选择部门">
+            <el-option v-for="item in positions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="联系方式" prop="contact">
           <el-input v-model="addInterviewForm.contact"></el-input>
@@ -154,10 +158,14 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item label="意向部门" prop="department">
-          <el-input v-model="editInterview.department"></el-input>
+          <el-select @change="getPositionsEdit" v-model="editInterview.department" placeholder="请选择部门">
+            <el-option v-for="item in departments" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="意向岗位" prop="position">
-          <el-input v-model="editInterview.position"></el-input>
+          <el-select v-model="editInterview.position" placeholder="请选择部门">
+            <el-option v-for="item in positions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
         </el-form-item>
       </el-form>
       <span slot="footer">
@@ -253,6 +261,9 @@ export default {
         }]
       },
 
+      departments: [],
+      positions: [],
+
       addInterviewVisible: false,
       editInterviewVisible: false
     }
@@ -278,8 +289,25 @@ export default {
       console.log(res)
     },
 
-    addInterview () {
-      this.addInterviewVisible = true
+    async getPositions () {
+      const depId = this.addInterviewForm.department
+      this.addInterviewForm.position = ''
+      const { data: res } = await this.$http.get(`position/${depId}`)
+      if (!res.success) return this.$message.error(res.msg)
+      console.log(res)
+      this.positions = res.data
+    },
+
+    async getPositionsEdit () {
+      const depId = this.editInterview.department
+      this.editInterview.position = ''
+      const { data: res } = await this.$http.get(`position/${depId}`)
+      if (!res.success) return this.$message.error(res.msg)
+      console.log(res)
+      this.positions = res.data
+    },
+
+    async addInterview () {
       this.addInterviewForm = {
         interviewee: '',
         interviewer: '',
@@ -288,6 +316,11 @@ export default {
         position: '',
         contact: ''
       }
+      const { data: res } = await this.$http.get(`dep`)
+      if (!res.success) return this.$message.error(res.msg)
+      // console.log(res)
+      this.departments = res.data
+      this.addInterviewVisible = true
     },
 
     // 添加面试提交
@@ -314,14 +347,18 @@ export default {
       })
     },
 
-    editPlan (plan) {
+    async editPlan (plan) {
       this.editInterview = {
         id: plan.id,
         interviewer: plan.interviewer,
         date: plan.date,
-        department: plan.department,
-        position: plan.position
+        department: '',
+        position: ''
       }
+      const { data: res } = await this.$http.get(`dep`)
+      if (!res.success) return this.$message.error(res.msg)
+      // console.log(res)
+      this.departments = res.data
       this.editInterviewVisible = true
     },
 

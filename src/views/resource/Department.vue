@@ -23,7 +23,15 @@
         <el-collapse-item v-for="item in depAndPosition" :key="item.id">
           <template slot="title">
             <span style="font-size: 20px;">{{ item.name }}</span>
-            <el-button style="margin-left: 12px;" type="success" size="small" plain @click="addPosition(item.id)">添加岗位</el-button>
+            <el-button style="margin-left: 20px;" type="success" size="small" plain @click="addPosition(item.id)">添加岗位</el-button>
+            <el-button
+              style="margin-left: 30px;"
+              type="danger"
+              size="mini"
+              icon="el-icon-delete"
+              @click="deleteDep(item.id)"
+              circle>
+            </el-button>
           </template>
             <el-table
               :data="item.positions"
@@ -162,6 +170,25 @@ export default {
       })
     },
 
+    deleteDep (id) {
+      this.$confirm('此操作将一键删除部门和其所有岗位, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { data: res } = await this.$http.get(`dep/delete/${id}`)
+        if (!res.success) return this.$message.error(res.msg)
+        console.log('id = ' + res.data)
+        this.$message.success('删除成功')
+        this.getAllInfo()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+
     addPosition (id) {
       this.addPositionForm = {
         depId: id,
@@ -209,6 +236,25 @@ export default {
           this.editPositionVisible = false
           this.getAllInfo()
         }
+      })
+    },
+
+    deletePosition (id) {
+      this.$confirm('此操作将删除该有岗位, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        const { data: res } = await this.$http.get(`position/delete/${id}`)
+        if (!res.success) return this.$message.error(res.msg)
+        console.log('id = ' + res.data)
+        this.$message.success('删除成功')
+        this.getAllInfo()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
       })
     },
 
