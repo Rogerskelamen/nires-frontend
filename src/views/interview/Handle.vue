@@ -37,7 +37,7 @@
               </el-descriptions-item>
               <el-descriptions-item label="操作">
                 <el-tooltip content="录用" placement="top">
-                  <el-button type="success" size="small" @click="hirePerson(item.id)">hire</el-button>
+                  <el-button type="success" size="small" @click="hirePerson(item)">hire</el-button>
                 </el-tooltip>
                 <el-tooltip content="未通过" placement="top">
                   <el-button type="danger" size="small" @click="passPerson(item.id)">pass</el-button>
@@ -53,32 +53,36 @@
     <el-dialog
       title="员工信息入档"
       :visible.sync="addEmpVisible"
-      width="width"
+      width="30%"
       :before-close="handleClose">
       <!-- <div></div> -->
-      <el-form :model="addEmpForm" status-icon ref="editInterviewFormRef" :rules="editFormRule" label-width="80px" size="normal">
-        <el-form-item label="面试官" prop="interviewer">
-          <el-input v-model="addEmpForm.interviewer"></el-input>
+      <el-form :model="addEmpForm" status-icon ref="addEmpFormRef" :rules="addEmpRule" label-width="80px" size="normal">
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="addEmpForm.name"></el-input>
         </el-form-item>
-        <el-form-item label="面试时间" prop="date">
+        <el-form-item label="性别" prop="gender">
+          <el-radio-group v-model="addEmpForm.gender">
+            <el-radio :label="1">男</el-radio>
+            <el-radio :label="2">女</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="出生日期" prop="birthday">
           <el-date-picker
-            v-model="addEmpForm.date"
-            type="datetime"
-            placeholder="选择日期时间"
-            align="right"
-            :picker-options="pickerOptions">
+            v-model="addEmpForm.birthday"
+            type="date"
+            placeholder="选择出生日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="意向部门" prop="department">
-          <el-input v-model="addEmpForm.department"></el-input>
+        <el-form-item label="薪水加成" prop="alterSalary">
+          <el-input v-model.number="addEmpForm.alterSalary"></el-input>
         </el-form-item>
-        <el-form-item label="意向岗位" prop="position">
-          <el-input v-model="addEmpForm.position"></el-input>
+        <el-form-item label="联系方式" prop="contact">
+          <el-input v-model="addEmpForm.contact"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer">
         <el-button @click="addEmpVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addEmpVisible = false">确 定</el-button>
+        <el-button type="primary" @click="addEmpSubmit">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -89,12 +93,38 @@ import { toTimeString } from '@/utils/time.js'
 
 export default {
   data () {
+    // 验证手机号格式
+    const checkPhone = (rule, value, callback) => {
+      const regPhone = /^[1][3,4,5,7,8][0-9]{9}$/
+
+      if (regPhone.test(value)) {
+        return callback()
+      }
+
+      callback(new Error('请输入正确的手机号格式'))
+    }
+
     return {
       interviewAssess: [],
 
-      addEmpForm: {
-
+      addEmpRule: {
+        name: [
+          { required: true, message: '请输入员工姓名', trigger: 'blur' }
+        ],
+        birthday: [
+          { type: 'date', required: true, message: '请选择生日', trigger: 'blur' }
+        ],
+        alterSalary: [
+          { required: true, message: '请定义加成薪水', trigger: 'blur' },
+          { type: 'number', message: '薪水加成必须为数字值(单位元)' }
+        ],
+        contact: [
+          { required: true, message: '请输入联系方式(手机号)', trigger: 'blur' },
+          { validator: checkPhone, trigger: 'blur' }
+        ]
       },
+
+      addEmpForm: {},
 
       addEmpVisible: false
     }
@@ -112,8 +142,38 @@ export default {
       console.log(res)
     },
 
-    hirePerson (id) {
+    hirePerson (interview) {
+      this.addEmpForm = {
+        interviewId: interview.id,
+        name: interview.interviewee,
+        gender: 1,
+        birthday: 0,
+        alterSalary: 0,
+        contact: interview.contact
+      }
       this.addEmpVisible = true
+    },
+
+    async addEmpSubmit () {
+      console.log(this.addEmpForm.birthday.getTime())
+      const { data: res } = await this.$http.post(
+        `staff/interview`,
+        {
+          interviewId: this.addEmpForm.interviewId,
+          name: this.addEmpForm.name,
+          gender: this.addEmpForm.gender,
+          birthday: this.addEmpForm.birthday.getTime(),
+          alterSalary: this.addEmpForm.alterSalary,
+          contact: this.addEmpForm.contact
+        }
+      )
+      if (!res.success) return this.$message.error(res.msg)
+      const { data: res2 } = await this.$http.get(`interviews/pass/${this.addEmpForm.interviewId}/1`)
+      if (!res2.success) return this.$message.error(res2.msg)
+      // console.log('id = ' + res.data)
+      this.$message.success('已录用该员工')
+      this.addEmpVisible = false
+      this.getAllInterviews()
     },
 
     passPerson (id) {
@@ -124,7 +184,7 @@ export default {
       }).then(async () => {
         const { data: res } = await this.$http.get(`interviews/pass/${id}/2`)
         if (!res.success) return this.$message.error(res.msg)
-        console.log('id = ' + res.data)
+        // console.log('id = ' + res.data)
         this.$message.success('已设为不通过')
         this.getAllInterviews()
       }).catch(() => {
