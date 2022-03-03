@@ -21,7 +21,7 @@
     <el-card class="interview-plan" shadow="always">
       <div slot="header">
         <span>面试计划</span>
-        <el-link type="primary">More<i class="el-icon-view el-icon--right"></i></el-link>
+        <el-link @click="goToPlans" type="primary">More<i class="el-icon-view el-icon--right"></i></el-link>
       </div>
       <!-- card body -->
       <!-- 计划数据展示 -->
@@ -60,7 +60,7 @@
     <el-card class="interview-record" shadow="always">
       <div slot="header">
         <span>面试记录</span>
-        <el-link type="primary">More<i class="el-icon-view el-icon--right"></i></el-link>
+        <el-link @click="goToRecords" type="primary">More<i class="el-icon-view el-icon--right"></i></el-link>
       </div>
       <!-- card body -->
       <!-- 计划数据展示 -->
@@ -278,14 +278,14 @@ export default {
     async getAllPlans () {
       const { data: res } = await this.$http.post(`interviews`, {})
       if (!res.success) return this.$message.error(res.msg)
-      this.interviewPlans = res.data
+      this.interviewPlans = res.data.interviewVoList
       console.log(res)
     },
 
     async getAllRecords () {
       const { data: res } = await this.$http.post(`interviews/records`, {})
       if (!res.success) return this.$message.error(res.msg)
-      this.interviewRecords = res.data
+      this.interviewRecords = res.data.interviewVoList
       console.log(res)
     },
 
@@ -396,6 +396,14 @@ export default {
           message: '已取消删除'
         })
       })
+    },
+
+    goToPlans () {
+      this.$router.push('/interview/moreplans')
+    },
+
+    goToRecords () {
+      this.$router.push('/interview/morerecords')
     },
 
     handleClose (done) {

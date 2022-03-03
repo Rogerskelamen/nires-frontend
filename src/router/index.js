@@ -29,6 +29,14 @@ const routes = [
       component: () => import('@/views/interview/Manage.vue')
     },
     {
+      path: '/interview/moreplans',
+      component: () => import('@/views/interview/more/Plan.vue')
+    },
+    {
+      path: '/interview/morerecords',
+      component: () => import('@/views/interview/more/Record.vue')
+    },
+    {
       path: '/interview/handle',
       component: () => import('@/views/interview/Handle.vue')
     },
