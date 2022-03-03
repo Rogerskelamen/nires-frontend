@@ -14,10 +14,26 @@
 
     <el-card class="show-staff" shadow="always">
       <div slot="header">
-        <span>员工列表</span>
-        <el-link type="primary" icon="el-icon-plus" size="default" @click="addStaff">新增快速入口</el-link>
+        <el-row class="title-bar" :gutter="20">
+          <el-col :span="2" :offset="0">
+            <span>员工列表</span>
+          </el-col>
+          <el-col :span="7" :offset="0">
+            <el-input placeholder="请输入内容" v-model="searchVal" class="input-with-select">
+              <el-select v-model="selectType" slot="prepend" placeholder="请选择">
+                <el-option label="姓名" value="1"></el-option>
+                <el-option label="部门名称" value="2"></el-option>
+              </el-select>
+              <el-button slot="append" icon="el-icon-search" @click="searchByType"></el-button>
+            </el-input>
+          </el-col>
+          <el-col :span="4" :offset="11">
+            <el-link type="primary" icon="el-icon-plus" size="default" @click="addStaff">新增快速入口</el-link>
+          </el-col>
+        </el-row>
       </div>
       <!-- card body -->
+
       <el-table :data="staffList" border stripe>
         <el-table-column
           type="index"
@@ -194,6 +210,9 @@ export default {
       departments: [],
       positions: [],
 
+      searchVal: '',
+      selectType: '',
+
       addStaffRule: {
         name: [
           { required: true, message: '请输入姓名', trigger: 'blur' }
@@ -247,17 +266,48 @@ export default {
 
   methods: {
     async getStaffList () {
-      const { data: res } = await this.$http.post(
-        `staff`,
-        {
-          page: this.currentPage,
-          pageSize: this.pageSize
-        }
-      )
-      if (!res.success) return this.$message.error(res.msg)
-      console.log(res)
-      this.staffList = res.data.staffVoList
-      this.totalStaff = res.data.total
+      if (this.selectType === '1') {
+        const { data: res } = await this.$http.post(
+          `staff/searchname?name=${this.searchVal}`,
+          {
+            page: this.currentPage,
+            pageSize: this.pageSize
+          }
+        )
+        if (!res.success) return this.$message.error(res.msg)
+        console.log(res)
+        this.staffList = res.data.staffVoList
+        this.totalStaff = res.data.total
+      } else if (this.selectType === '2') {
+        const { data: res } = await this.$http.post(
+          `staff/searchdep?depname=${this.searchVal}`,
+          {
+            page: this.currentPage,
+            pageSize: this.pageSize
+          }
+        )
+        if (!res.success) return this.$message.error(res.msg)
+        console.log(res)
+        this.staffList = res.data.staffVoList
+        this.totalStaff = res.data.total
+      } else {
+        const { data: res } = await this.$http.post(
+          `staff`,
+          {
+            page: this.currentPage,
+            pageSize: this.pageSize
+          }
+        )
+        if (!res.success) return this.$message.error(res.msg)
+        console.log(res)
+        this.staffList = res.data.staffVoList
+        this.totalStaff = res.data.total
+      }
+    },
+
+    searchByType () {
+      this.currentPage = 1
+      this.getStaffList()
     },
 
     async getPositions () {
@@ -373,8 +423,17 @@ export default {
 .show-staff {
   margin-top: 20px;
 
-  .el-link {
-    float: right;
+  .title-bar {
+    display: flex;
+    align-items: center;
+
+    .el-select /deep/ input {
+      width: 100px;
+    }
+
+    .el-link {
+      float: right;
+    }
   }
 }
 
