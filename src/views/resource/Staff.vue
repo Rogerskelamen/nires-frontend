@@ -307,6 +307,7 @@ export default {
 
     searchByType () {
       this.currentPage = 1
+      if (this.selectType === '') return this.$message.error('请选择筛选类型')
       this.getStaffList()
     },
 
