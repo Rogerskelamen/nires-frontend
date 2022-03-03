@@ -120,10 +120,6 @@ export default {
           id: '31',
           name: '职薪管理',
           path: '/alter/position'
-        }, {
-          id: '32',
-          name: '离职管理',
-          path: '/alter/transfer'
         }]
       }, {
         id: '4',

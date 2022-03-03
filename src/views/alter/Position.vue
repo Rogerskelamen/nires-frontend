@@ -34,17 +34,22 @@
       <el-row :gutter="20">
         <el-col v-for="item in staffList" :key="item.id" :span="12" :offset="0">
           <el-card style="margin-bottom: 15px;">
-            <el-descriptions class="margin-top" title="无边框列表" :column="3" :size="size">
+            <el-descriptions class="margin-top" :title="item.name" :column="2">
               <template slot="extra">
-                <el-button type="primary" size="small">操作</el-button>
+                <el-tooltip class="item" effect="dark" content="调整岗位" placement="top">
+                  <el-button type="primary" @click="alterPosition(item.id)" size="mini" icon="el-icon-edit" circle></el-button>
+                </el-tooltip>
+                <el-button type="danger" @click="alterSalary(item.id)" plain size="small">加薪</el-button>
               </template>
-              <el-descriptions-item label="用户名">{{ item.name }}</el-descriptions-item>
-              <el-descriptions-item label="手机号">{{ item.contact }}</el-descriptions-item>
-              <el-descriptions-item label="居住地">苏州市</el-descriptions-item>
-              <el-descriptions-item label="备注">
-                <el-tag size="small">学校</el-tag>
+              <el-descriptions-item label="联系方式" :span="2">{{ item.contact }}</el-descriptions-item>
+              <el-descriptions-item label="部门">{{ item.department }}</el-descriptions-item>
+              <el-descriptions-item label="岗位">{{ item.position }}</el-descriptions-item>
+              <el-descriptions-item label="基本工资">{{ item.baseSalary }}</el-descriptions-item>
+              <el-descriptions-item label="总工资">{{ item.baseSalary + item.alterSalary }}</el-descriptions-item>
+              <el-descriptions-item label="加成工资占比" :span="2">
+                <el-progress :percentage="parseInt((item.alterSalary / item.baseSalary) * 100)"></el-progress>
+                <!-- <el-progress :percentage="50"></el-progress> -->
               </el-descriptions-item>
-              <el-descriptions-item label="联系地址">江苏省苏州市吴中区吴中大道 1188 号</el-descriptions-item>
             </el-descriptions>
           </el-card>
         </el-col>
@@ -58,6 +63,31 @@
         :total="totalStaff">
       </el-pagination>
     </el-card>
+
+    <!-- 调整岗位 -->
+    <el-dialog
+      title="调整岗位"
+      :visible.sync="alterPositionVisible"
+      width="30%"
+      :before-close="handleClose">
+      <!-- <div></div> -->
+      <el-form status-icon :model="alterPositionForm" ref="alterPositionFormRef" :rules="alterPositionRule" label-width="80px" :inline="false" size="medium">
+        <el-form-item label="部门" prop="depId">
+          <el-select @change="getPositions" v-model="alterPositionForm.depId" placeholder="请选择部门">
+            <el-option v-for="item in departments" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="岗位" prop="positionId">
+          <el-select v-model="alterPositionForm.positionId" placeholder="请选择部门">
+            <el-option v-for="item in positions" :key="item.id" :label="item.name" :value="item.id"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer">
+        <el-button @click="alterPositionVisible = false">取 消</el-button>
+        <el-button type="primary" @click="alterPositionSubmit">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -71,6 +101,19 @@ export default {
 
       departments: [],
       positions: [],
+
+      alterPositionVisible: false,
+
+      alterPositionForm: {},
+
+      alterPositionRule: {
+        depId: [
+          { required: true, message: '请输入部门', trigger: 'blur' }
+        ],
+        positionId: [
+          { required: true, message: '请输入岗位', trigger: 'blur' }
+        ]
+      },
 
       currentPage: 1,
       pageSize: 6,
@@ -130,12 +173,59 @@ export default {
     },
 
     async getPositions () {
-      const depId = this.addStaffForm.department
-      this.addStaffForm.position = ''
+      const depId = this.alterPositionForm.depId
+      this.alterPositionForm.positionId = ''
       const { data: res } = await this.$http.get(`position/${depId}`)
       if (!res.success) return this.$message.error(res.msg)
-      console.log(res)
+      // console.log(res)
       this.positions = res.data
+    },
+
+    async alterPosition (id) {
+      this.alterPositionForm = {
+        id: id,
+        depId: '',
+        positionId: ''
+      }
+      const { data: res } = await this.$http.get(`dep`)
+      if (!res.success) return this.$message.error(res.msg)
+      // console.log(res)
+      this.departments = res.data
+      this.alterPositionVisible = true
+    },
+
+    alterPositionSubmit () {
+      this.$refs.alterPositionFormRef.validate(async valid => {
+        if (valid) {
+          const { data: res } = await this.$http.post(`staff/alter/position`, this.alterPositionForm)
+          if (!res.success) return this.$message.error(res.msg)
+          console.log('id = ' + res.data)
+          this.$message.success('变更成功')
+          this.getStaffList()
+          this.alterPositionVisible = false
+        }
+      })
+    },
+
+    alterSalary (id) {
+      this.$prompt('请输入加成薪水', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /^[0-9]*$/,
+        inputErrorMessage: '请输入数值'
+      }).then(async val => {
+        if (val.value === null) return this.$message.error('输入不能为空')
+        const { data: res } = await this.$http.get(`staff/alter/salary?id=${id}&salary=${val.value}`)
+        if (!res.success) return this.$message.error(res.msg)
+        console.log(res)
+        this.$message.success('更改成功')
+        this.getStaffList()
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '取消输入'
+        })
+      })
     },
 
     handleCurrentChange (val) {
@@ -171,5 +261,12 @@ export default {
 .el-pagination {
   float: right;
   margin-bottom: 12px;
+}
+
+.el-progress /deep/ .el-progress-bar__outer {
+  width: 150px;
+}
+.el-progress /deep/ .el-progress__text {
+  transform: translateX(25px);
 }
 </style>

@@ -45,10 +45,6 @@ const routes = [
       component: () => import('@/views/alter/Position.vue')
     },
     {
-      path: '/alter/transfer',
-      component: () => import('@/views/alter/Transfer.vue')
-    },
-    {
       path: '/system/admin',
       component: () => import('@/views/system/Admin.vue')
     }]
