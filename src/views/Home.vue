@@ -61,7 +61,9 @@
             </el-col>
 
             <el-col class="user-place" :span="12" :offset="0">
-              <i class="el-icon-user-solid"></i>
+              <div style="margin: 4px 6px 0 0;">
+                <el-avatar size="small" icon="el-icon-user-solid"></el-avatar>
+              </div>
               <el-dropdown>
                 <span class="el-dropdown-link">
                   {{ adminName }}
