@@ -26,10 +26,10 @@
 
     <ul class="bottom-bar">
       <li>
-        <span>Focus my <a href="https://rokelamen.top">Blog</a></span>
+        <span>Focus my <a target="_blank" href="https://rokelamen.top">Blog</a></span>
       </li>
       <li>
-        <span>Star me on <a href="https://github.com/Rogerskelamen/nires-frontend">GitHub</a></span>
+        <span>Star me on <a target="_blank" href="https://github.com/Rogerskelamen/nires-frontend">GitHub</a></span>
       </li>
     </ul>
 
