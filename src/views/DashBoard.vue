@@ -13,12 +13,12 @@
     </div>
 
     <el-row :gutter="20">
-      <el-col :span="12" :offset="0">
+      <el-col :span="14" :offset="0">
         <el-card class="bar-charts">
           <div id="bar"></div>
         </el-card>
       </el-col>
-      <el-col :span="12" :offset="0">
+      <el-col :span="10" :offset="0">
         <el-card class="pie-charts">
           <div id="pie"></div>
         </el-card>
@@ -49,27 +49,82 @@ export default {
 
   mounted () {
     this.drawBar()
+    this.drawPie()
   },
 
   methods: {
-    drawBar () {
+    async drawBar () {
       // 基于准备好的dom，初始化echarts实例
+      const { data: res } = await this.$http.get(`charts/bar`)
+      console.log(res)
+      if (!res.success) return this.$message.error(res.msg)
       var myChart = echarts.init(document.getElementById('bar'))
       // 绘制图表
       myChart.setOption({
         title: {
-          text: '近一个月的应招情况'
+          text: '应聘意向各部门人数'
         },
-        tooltip: {},
         xAxis: {
-          data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+          data: res.data.titles
         },
         yAxis: {},
         series: [
           {
             name: '销量',
             type: 'bar',
-            data: [5, 20, 36, 10, 10, 20]
+            barWidth: 50,
+            showBackground: true,
+            backgroundStyle: {
+              color: 'rgba(180, 180, 180, 0.2)'
+            },
+            data: res.data.data
+          }
+        ]
+      })
+    },
+
+    async drawPie () {
+      const { data: res } = await this.$http.get(`charts/pie`)
+      console.log(res)
+      if (!res.success) return this.$message.error(res.msg)
+      var myChart = echarts.init(document.getElementById('pie'))
+      myChart.setOption({
+        title: {
+          text: '各部门人数'
+        },
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          top: '5%',
+          left: 'center'
+        },
+        series: [
+          {
+            name: 'Access From',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderRadius: 10,
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: {
+              show: false,
+              position: 'center'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: '40',
+                fontWeight: 'bold'
+              }
+            },
+            labelLine: {
+              show: false
+            },
+            data: res.data
           }
         ]
       })
