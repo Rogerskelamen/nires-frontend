@@ -2,7 +2,7 @@ import router from '@/router'
 import axios from 'axios'
 
 // 设置baseURL
-axios.defaults.baseURL = 'http://localhost:8091/'
+axios.defaults.baseURL = 'http://39.98.122.169:8091/'
 
 // 设置请求拦截器
 axios.interceptors.request.use(config => {
