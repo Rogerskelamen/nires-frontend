@@ -106,7 +106,7 @@ export default {
   justify-content: center;
   align-items: center;
   position: relative;
-  background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('https://gitee.com/rogerskelamen/mdpic/raw/master/img/txrpic-10556739.png');
+  background: linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)), url('https://s2.loli.net/2022/04/04/9DwhaRzWCJk6ET3.png');
   background-repeat: no-repeat;
   background-size: cover;
 
